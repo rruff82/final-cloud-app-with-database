@@ -105,7 +105,6 @@ class Question(models.Model):
     lesson_id = models.ForeignKey(Lesson, on_delete=models.CASCADE)    # Foreign key to lesson
     question_text = models.CharField(max_length=200, default="?") # question  text
     grade = models.IntegerField(default=0) # question grade/mark
-    course = models.ForeignKey(Course, on_delete=models.CASCADE) 
     
     # <HINT> A sample model method to calculate if learner get the score of the question
     def is_get_score(self, selected_ids):
