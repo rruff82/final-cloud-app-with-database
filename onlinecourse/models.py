@@ -74,6 +74,12 @@ class Lesson(models.Model):
     order = models.IntegerField(default=0)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     content = models.TextField()
+    
+    def __str__(self):
+        return "Name: " + self.title + "," + \
+            "Description: " + self.order + ", Course:" + self.course + \
+            "Content: " + self.content;
+    
 
 
 # Enrollment model
@@ -93,6 +99,13 @@ class Enrollment(models.Model):
     date_enrolled = models.DateField(default=now)
     mode = models.CharField(max_length=5, choices=COURSE_MODES, default=AUDIT)
     rating = models.FloatField(default=5.0)
+    
+    def __str__(self):
+        return "User: " + self.user + ", Course:" + self.course + \
+            "Date Enrolled: " + self.date_enrolled + "Mode: " + self.mode + \
+            "Rating: " + self.rating;
+    
+    
 
 
 # <HINT> Create a Question Model with:
@@ -114,7 +127,11 @@ class Question(models.Model):
             return True
         else:
             return False
-
+    
+    def __str__(self):
+        return "Lesson ID: " + self.lesson_id + "," + \
+            "Question Text: " + self.question_text + ", Grade:" + self.grade;
+    
 
 #  <HINT> Create a Choice Model with:
     # Used to persist choice content for a question
@@ -126,6 +143,9 @@ class Choice(models.Model):
     choice_text = models.CharField(max_length=200, default="distractor")
     is_correct = models.BooleanField(default=False)
     question_id = models.ForeignKey(Question, on_delete=models.CASCADE) 
+    def __str__(self):
+        return "Choice Text: " + self.choice_text + "," + \
+            "Is Correct?: " + self.is_correct + ", Quesion ID:" + self.question_id;
     
 
 # <HINT> The submission model
@@ -135,4 +155,7 @@ class Choice(models.Model):
 class Submission(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice)
+    def __str__(self):
+            
+        return "Submission with Enrollment ID: " + self.enrollment;
 #    Other fields and methods you would like to design
