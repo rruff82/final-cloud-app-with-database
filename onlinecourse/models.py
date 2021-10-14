@@ -107,12 +107,6 @@ class Choice(models.Model):
     
 
 
-# <HINT> The submission model
-# One enrollment could have multiple submission
-# One submission could have multiple choices
-# One choice could belong to multiple submissions
-class Submission(models.Model):
-    choices = models.ManyToManyField(Choice)
 
 # Enrollment model
 # <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
@@ -131,7 +125,16 @@ class Enrollment(models.Model):
     date_enrolled = models.DateField(default=now)
     mode = models.CharField(max_length=5, choices=COURSE_MODES, default=AUDIT)
     rating = models.FloatField(default=5.0)
-    submissions = models.ManyToManyField(Submission)
+
+
+# <HINT> The submission model
+# One enrollment could have multiple submission
+# One submission could have multiple choices
+# One choice could belong to multiple submissions
+class Submission(models.Model):
+    enrollment =  models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    choices = models.ManyToManyField(Choice)
+    
     
 
 

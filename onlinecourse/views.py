@@ -148,10 +148,17 @@ def extract_answers(request):
 class SubmissionView(generic.DetailView):
     template_name = 'onlinecourse/exam_result_bootstrap.html'
     context_object_name = 'submission'
+    
     def get_queryset(self):
         print("Get Query set called on {}\n".format(self))
     
         user = self.request.user
+        print("User: {}\n".format(user))
+        
+        enrollment = Enrollment.objects.filter(submission=self.id)
+        
+        print("My enrollment? {}".format(enrollment))
+        
         courses = Course.objects.order_by('-total_enrollment')[:10]
         for course in courses:
             if user.is_authenticated:
