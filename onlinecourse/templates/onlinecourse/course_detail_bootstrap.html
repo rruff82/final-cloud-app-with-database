@@ -48,8 +48,8 @@
                         <div class="card-header"><h5>Lesson {{lesson.order|add:1}}: {{lesson.title}}</h5></div>
                         <div class="card-body">{{lesson.content}}</div>
 						{% if user.is_authenticated %}
-							<div id="exam">
-							<form id="questionform" action="point to a submit view" method="post">
+							<div id="exam" class="card-body">
+							<form id="questionform" action="submit/" method="post">
 							<ol>
 							{% for question in lesson.question_set.all %}
 							<!--... for each question in the course ...-->
@@ -82,13 +82,7 @@
             <!-- Task: show questions and choices -->
             <!-- <HINT> Use Bootstrap Collapse to hide exam first, more details could be found here
             https://www.w3schools.com/bootstrap4/bootstrap_collapse.asp-->
-
-
-
-            <!-- <HINT> Create a form to collect the selected choices for all questions -->
-            <!-- <HINT> For each question choice, you may create a checkbox input like
-            <input type="check" name="choice_{{choice.id}}" id="{{choice.id}}" ...>
-            -->
+           
 
             <!-- A choice submission form example
             <form id="questionform" action="point to a submit view" method="post">
