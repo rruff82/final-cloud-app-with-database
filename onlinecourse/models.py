@@ -89,9 +89,14 @@ class Question(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, default=None) 
     # <HINT> A sample model method to calculate if learner get the score of the question
     def is_get_score(self, selected_ids):
-        all_answers = self.choice_set.filter(is_correct=True).count()
-        selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
-        if all_answers == selected_correct:
+        print("is_get_score called on {} with {}\n".format(self.__dict__,selected_ids))
+        all_answers = self.choice_set.filter(is_correct=True, question=self.id).count()
+        print("all answers: {}\n".format(all_answers))
+        selected_correct = self.choice_set.filter(is_correct=True, question=self.id, id__in=selected_ids).count()
+        selected_total = self.choice_set.filter(question=self.id, id__in=selected_ids).count()
+        print("selected correct: {}\n".format(selected_correct))
+        print("selected total: {}\n".format(selected_total))
+        if all_answers == selected_correct and selected_correct == selected_total:
             return True
         else:
             return False
@@ -108,20 +113,6 @@ class Choice(models.Model):
         return "Choice: "+self.choice_text;
     
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Enrollment model
 # <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
 # And we could use the enrollment to track information such as exam submissions
@@ -140,6 +131,9 @@ class Enrollment(models.Model):
     mode = models.CharField(max_length=5, choices=COURSE_MODES, default=AUDIT)
     rating = models.FloatField(default=5.0)
 
+    def __str__(self):
+        return "Enrollent for User: [" + str(self.user) +"] in Course: [" + str(self.course.id) + "]";
+
 
 # <HINT> The submission model
 # One enrollment could have multiple submission
@@ -147,8 +141,9 @@ class Enrollment(models.Model):
 # One choice could belong to multiple submissions
 class Submission(models.Model):
     enrollment =  models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice)
-    
+    submit_date = models.DateField(null=True)
     
 
 

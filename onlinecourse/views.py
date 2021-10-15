@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment, Question, Choice, Submission
+from .models import Course, Enrollment, Question, Choice, Submission, Lesson
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -110,23 +110,23 @@ def enroll(request, course_id):
          # Collect the selected choices from exam form
          # Add each selected choice object to the submission object
          # Redirect to show_exam_result with the submission id
-def submit(request, course_id):
+def submit(request, course_id, lesson_id):
     user = request.user
     course = get_object_or_404(Course, pk=course_id)
+    my_lesson = get_object_or_404(Lesson, pk=lesson_id)
     my_enrollment = Enrollment.objects.filter(user=user, course=course)
     my_answers = extract_answers(request)
     
     print("Hello from submit function! Answers: {}\n".format(my_answers))
     
-    submission = Submission.objects.create(enrollment=my_enrollment[0])
-    for ans in my_answers:
-        submission.choices.add(get_object_or_404(Choice, pk=ans))
+    submission = Submission.objects.create(enrollment=my_enrollment[0],lesson=my_lesson)
+    submission.choices.set(my_answers)
     submission.save()
     
     print("My submission: {}\n".format(submission))
     print("My course id is {} and submission_id is {}\n".format(course_id,submission.id))
-    
-    return HttpResponseRedirect(reverse(viewname='onlinecourse:result', args=(course_id,submission.id,)))
+
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:result', args=(course_id,lesson_id,submission.id,)))
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 def extract_answers(request):
@@ -147,23 +147,56 @@ def extract_answers(request):
         # Calculate the total score
 class SubmissionView(generic.DetailView):
     template_name = 'onlinecourse/exam_result_bootstrap.html'
-    context_object_name = 'submission'
+    model = Submission
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        print("Get Context Data Called: {}\n".format(self.__dict__))
+        print("My Enrollment: {}\n".format(self.object.enrollment))
+        print("My Course: {}\n".format(self.object.enrollment.course))
+        print("My User: {}\n".format(self.object.enrollment.user))
+
+        print("Choice count: {}\n".format(self.object.choices.count()))
+        my_choices = []
+        for c in self.object.choices.all():
+            my_choices.append(c.id)
+        print("Choice ID List: {}\n".format(my_choices))
+
+
+        context["course"] = self.object.enrollment.course
+        context["user"] = self.object.enrollment.user
+
+        print("My Lesson: {}\n".format(self.object.lesson))
+        context["lesson"] = self.object.lesson
+        my_questions = Question.objects.filter(lesson=self.object.lesson)
+
+        print("My questions: {}\n".format(my_questions))
+        context["questions"] = my_questions
+        grades = []
+        points_total = 0
+        points_earned = 0
+        for q in my_questions.all():
+            print("Question: {}\n".format(q))
+            correct = q.is_get_score(my_choices)
+            points_total += q.grade
+            if (correct):
+                grades.append("{} point(s) earned (out of {})".format(q.grade,q.grade))
+                points_earned += q.grade
+            else:
+                grades.append("0 point(s) earned (out of {})".format(q.grade))
+
+        print("Grades: {}\n".format(grades))
+
+        context["grades"] = grades
+        context["grade"] = 100*points_earned/points_total if (points_total>0) else None
+
+        return context
+
+
+
     
-    def get_queryset(self):
-        print("Get Query set called on {}\n".format(self))
-    
-        user = self.request.user
-        print("User: {}\n".format(user))
-        
-        enrollment = Enrollment.objects.filter(submission=self.id)
-        
-        print("My enrollment? {}".format(enrollment))
-        
-        courses = Course.objects.order_by('-total_enrollment')[:10]
-        for course in courses:
-            if user.is_authenticated:
-                course.is_enrolled = check_if_enrolled(user, course)
-        return courses
+
    
 
 

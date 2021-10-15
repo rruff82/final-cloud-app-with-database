@@ -49,7 +49,7 @@
                         <div class="card-body">{{lesson.content}}</div>
 						{% if user.is_authenticated %}
 							<div id="exam" class="card-body">
-							<form id="questionform" action="submit/" method="post">
+							<form id="questionform" action="submit/{{lesson.id}}" method="post">
 							<ol>
 							{% for question in lesson.question_set.all %}
 							<!--... for each question in the course ...-->
