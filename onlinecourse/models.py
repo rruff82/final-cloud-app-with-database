@@ -75,6 +75,8 @@ class Lesson(models.Model):
     order = models.IntegerField(default=0)
     content = models.TextField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE) 
+    def __str__(self):
+        return "Lesson: "+self.title;
 # <HINT> Create a Question Model with:
     # Used to persist question content for a course
     # Has a One-To-Many (or Many-To-Many if you want to reuse questions) relationship with course
@@ -84,7 +86,7 @@ class Lesson(models.Model):
 class Question(models.Model):
     question_text = models.CharField(max_length=200, default="?") # question  text
     grade = models.IntegerField(default=0) # question grade/mark
-    lessons = models.ManyToManyField(Lesson)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, default=None) 
     # <HINT> A sample model method to calculate if learner get the score of the question
     def is_get_score(self, selected_ids):
         all_answers = self.choice_set.filter(is_correct=True).count()
@@ -93,11 +95,17 @@ class Question(models.Model):
             return True
         else:
             return False
+    def __str__(self):
+        return "Question: "+self.question_text;
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE) 
     choice_text = models.CharField(max_length=200, default="?") # question  text
     is_correct = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return "Choice: "+self.choice_text;
     
     
 
